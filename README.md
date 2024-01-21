@@ -1,66 +1,40 @@
-## Foundry
+# CUBE3 Protection
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This repository contains the abstract smart contracts required to integrate with the [CUBE3 Core Protocol](https://github.com/cube-web3/protocol-core-solidity). Please review the Protocol's readme to ensure you understand the relationship between
 
-Foundry consists of:
+In-depth documentation is available at [docs.cube3.io](https://docs.cube3.io).
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## Installation
 
-## Documentation
+### Foundry
 
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+```bash
+forge install cube-web3/protection-solidity
 ```
 
-### Test
+Next, add the CUBE3 contracts to your `remappings.txt` file:
 
-```shell
-$ forge test
+```
+@cube3/=lib/cube-web3/protection-solidity
 ```
 
-### Format
+### Hardhat
 
-```shell
-$ forge fmt
+```bash
+
 ```
 
-### Gas Snapshots
+### Steps required to create an integration
 
-```shell
-$ forge snapshot
-```
+- Inherit one of the abstract contracts provided in this repository.
+- Decorate desired functions with the `cube3Protected` modifier.
+- Deploy your contract and provide the `integrationAdmin` address to the constructor. See [Security Considerations](#Security Considerations) section for more details about the admin role.
+- Visit [cube3.ai](https://cube3.ai) to sign up for RASP and register your integration.
+- Enable function protection for your functions.
+- Add the CUBE3 SDK to your dDapp.
 
-### Anvil
+## Security considerations
 
-```shell
-$ anvil
-```
+Function protection logic is handled in the [CUBE3 Router](). The protection status of functions decorated with the `cube3Protected` modifier can only be updated by this integration's admin.
 
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
+## Registration

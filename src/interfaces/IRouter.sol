@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.19;
+
+interface IRouter {
+    function initiateIntegrationRegistration(address admin) external returns (bool);
+    function routeToModule(
+        address integrationMsgSender,
+        uint256 integrationMsgValue,
+        bytes calldata integrationCalldata
+    ) external returns (bytes32);
+}
