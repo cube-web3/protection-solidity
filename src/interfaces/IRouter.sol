@@ -2,10 +2,13 @@
 pragma solidity 0.8.19;
 
 interface IRouter {
+
+    // TODO: NATSPEC
     function initiateIntegrationRegistration(address admin) external returns (bool);
     function routeToModule(
         address integrationMsgSender,
         uint256 integrationMsgValue,
         bytes calldata integrationCalldata
     ) external returns (bytes32);
+        function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }

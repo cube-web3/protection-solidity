@@ -38,3 +38,16 @@ Next, add the CUBE3 contracts to your `remappings.txt` file:
 Function protection logic is handled in the [CUBE3 Router](). The protection status of functions decorated with the `cube3Protected` modifier can only be updated by this integration's admin.
 
 ## Registration
+
+## Usage
+
+- Note about mutable vs immutable and needing to have access control for mutable version to make sense
+- Need to include router at deployment
+
+## FAQ
+
+### Which contract should I be importing?
+
+### What happens if I stop using CUBE3's services after I've deployed my contract?
+
+### Do I have to start using CUBE3 from the moment I deploy my contract?
