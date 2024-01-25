@@ -14,18 +14,20 @@ abstract contract ProtectionBase {
 
     event Cube3ProtectionRouterUpdated(address newRouter);
     
-    event Cube3ProtocolConnectionUpdated(bool shouldUseCube3);
+    event Cube3ProtocolConnectionUpdated(bool connectionEstablished);
 
     /// @custom:storage-location erc7201:cube3.protected.storage
     struct ProtectedStorage {
         address router;
-        bool shouldUseCube3;
+        bool connectionEstablished;
     }
 
+    /// @dev Adding this modifier to a function adds the ability to apply function-level protection to the function.
+    ///      If the connection is established, all calls are diverted to the CUBE3 Router.
     modifier cube3Protected(bytes calldata cube3Payload) {
-        // Read both the router and shouldUseCube3 from storage in a single SLOAD.
+        // Read both the router and connectionEstablished from storage in a single SLOAD.
         ProtectedStorage memory protectedStorage = _protectedStorage();
-        if (protectedStorage.shouldUseCube3) {
+        if (protectedStorage.connectionEstablished) {
             _assertShouldProceedWithCall(cube3Payload);
         }
         _;
@@ -78,7 +80,7 @@ abstract contract ProtectionBase {
         emit Cube3ProtectionRouterUpdated(router);
 
         // Enable/disable the connection to the CUBE3 core protocol.
-        protectedStorage.shouldUseCube3 = enabledByDefault;
+        protectedStorage.connectionEstablished = enabledByDefault;
         emit Cube3ProtocolConnectionUpdated(enabledByDefault);
 
         // TODO: will this succeed if the router address is wrong?
@@ -91,10 +93,10 @@ abstract contract ProtectionBase {
     /// @dev WARNING: This MUST only be called within an external/public fn by an account with elevated privileges.
     /// @dev If the derived contract has no access control, this function should not be exposed and the connection
     ///      to the protocol is locked at the time of deployment.
-    function _warning_updateShouldUseCube3(bool shouldUseCube3) internal {
+    function _warning_updateconnectionEstablished(bool connectionEstablished) internal {
         ProtectedStorage storage protectedStorage = _protectedStorage();
-        protectedStorage.shouldUseCube3 = shouldUseCube3;
-        emit Cube3ProtocolConnectionUpdated(shouldUseCube3);
+        protectedStorage.connectionEstablished = connectionEstablished;
+        emit Cube3ProtocolConnectionUpdated(connectionEstablished);
     }
 
     function _protectedStorage() internal pure returns (ProtectedStorage storage cube3Storage) {
