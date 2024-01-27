@@ -7,7 +7,9 @@ import { IRouter } from "./interfaces/IRouter.sol";
 ///      a harness contract.
 abstract contract ProtectionBase {
     // Hashed return value from the router indicating the call is safe to proceed.
-    bytes32 private constant PROCEED_WITH_CALL = keccak256("PROCEED_WITH_CALL");
+    bytes32 private constant PROCEED_WITH_CALL = keccak256("CUBE3_PROCEED_WITH_CALL");
+
+    bytes32 private constant PRE_REGISTRATION_SUCCEEDED = keccak256("CUBE3_PRE_REGISTRATION_SUCCEEDED");
 
     // keccak256(abi.encode(uint256(keccak256("cube3.protected.storage")) - 1)) & ~bytes32(uint256(0xff));
     bytes32 private constant CUBE3_PROTECTED_STORAGE_LOCATION =
@@ -20,7 +22,7 @@ abstract contract ProtectionBase {
     /// @custom:storage-location erc7201:cube3.protected.storage
     struct ProtectedStorage {
         address router;
-        bool connectionEstablished;
+        bool shouldConnectToProtocol;
     }
 
     /// @dev Adding this modifier to a function adds the ability to apply function-level protection to the function.
@@ -28,7 +30,7 @@ abstract contract ProtectionBase {
     modifier cube3Protected(bytes calldata cube3Payload) {
         // Read both the router and connectionEstablished from storage in a single SLOAD.
         ProtectedStorage memory protectedStorage = _protectedStorage();
-        if (protectedStorage.connectionEstablished) {
+        if (protectedStorage.shouldConnectToProtocol) {
             _assertShouldProceedWithCall(cube3Payload);
         }
         _;
@@ -76,23 +78,23 @@ abstract contract ProtectionBase {
         emit Cube3ProtectionRouterUpdated(router);
 
         // Enable/disable the connection to the CUBE3 core protocol.
-        protectedStorage.connectionEstablished = enabledByDefault;
+        protectedStorage.shouldConnectToProtocol = enabledByDefault;
         emit Cube3ProtocolConnectionUpdated(enabledByDefault);
 
         // TODO: will this succeed if the router address is wrong?
         // Pre-register this integration with the router and set the integration admin address. Serves the dual purpose
         // of validating that the correct router address was passed to the constructor and setting the admin.
-        bool preRegistrationSucceeded = IRouter(router).initiateIntegrationRegistration(integrationAdmin);
-        require(preRegistrationSucceeded, "CUBE3: PreReg Fail");
+        (bool success, bytes memory data) = router.call(abi.encodeWithSelector(IRouter.initiateIntegrationRegistration.selector, (integrationAdmin)));
+        require(success && abi.decode(data, (bytes32)) == PRE_REGISTRATION_SUCCEEDED, "CUBE3: PreReg Fail");
     }
 
     /// @dev WARNING: This MUST only be called within an external/public fn by an account with elevated privileges.
     /// @dev If the derived contract has no access control, this function should not be exposed and the connection
     ///      to the protocol is locked at the time of deployment.
-    function _warning_updateconnectionEstablished(bool connectionEstablished) internal {
+    function _updateShouldUseProtocol(bool connectToProtocol) internal {
         ProtectedStorage storage protectedStorage = _protectedStorage();
-        protectedStorage.connectionEstablished = connectionEstablished;
-        emit Cube3ProtocolConnectionUpdated(connectionEstablished);
+        protectedStorage.shouldConnectToProtocol = connectToProtocol;
+        emit Cube3ProtocolConnectionUpdated(connectToProtocol);
     }
 
     function _protectedStorage() internal pure returns (ProtectedStorage storage cube3Storage) {

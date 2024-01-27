@@ -19,8 +19,15 @@ contract ProtectionBaseHarness is ProtectionBase {
      return _protectedStorage();
    }
 
-    // TODO: test payable + non payable
-   function getMsgValue() external view returns (uint256) {
+   function updateShouldUseProtocol(bool shouldConnect) external {
+    _updateShouldUseProtocol(shouldConnect);
+   }
+
+   function getMsgValuePayable() external payable returns (uint256) {
+    return _getMsgValue();
+   }
+
+   function getMsgValueNonPayable() external view returns (uint256) {
     return _getMsgValue();
    }
 }

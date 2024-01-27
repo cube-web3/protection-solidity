@@ -7,7 +7,7 @@ contract MockRouter is Constants {
     bool public registrationShouldSucceed;
     bool public routingShouldSucceed;
 
-
+    mapping(address => address) public mockIntegrationAdmin;
 
     constructor(bool _registrationShouldSucceed, bool _routingShouldSucceed) {
         registrationShouldSucceed = _registrationShouldSucceed;
@@ -22,14 +22,15 @@ contract MockRouter is Constants {
         routingShouldSucceed = _routingShouldSucceed;
     }
 
-    function initiateIntegrationRegistration(address admin) external view returns (bool) {
+    function initiateIntegrationRegistration(address admin) external returns (bytes32) {
         // prevent compiler warnings
-        (admin);
-        if (!registrationShouldSucceed) {
-            return false;
-        }
 
-        return true;
+        if (!registrationShouldSucceed) {
+            return keccak256("FAILED");
+        }
+        mockIntegrationAdmin[msg.sender] = admin;
+
+        return PRE_REGISTRATION_SUCCEEDED;
     }
     function routeToModule(
         address integrationMsgSender,
