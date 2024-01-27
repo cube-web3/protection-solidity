@@ -44,6 +44,10 @@ Function protection logic is handled in the [CUBE3 Router](). The protection sta
 - Note about mutable vs immutable and needing to have access control for mutable version to make sense
 - Need to include router at deployment
 
+## Testing
+
+The [CUBE3 Core Protocol]() will be deployed on multiple EVM-compatible chains. For this reason, the `solc` version of the protocol is fixed to `0.8.19` to account for the introduction of the `PUSH0` opcode, which not all chains support. You can read more [here](https://soliditylang.org/blog/2023/05/10/solidity-0.8.20-release-announcement/) about the changes introduced in the Shanghai upgrade. To avoid version conflicts and adding dependencies to this repository, tests covering proxies and the upgradeable version of the protection contracts import `Openzeppelin` contracts from the `release-v4.9` branch that are included in the `test/external_libs/openzeppelin` directory.
+
 ## FAQ
 
 ### Which contract should I be importing?
