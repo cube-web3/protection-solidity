@@ -4,15 +4,28 @@ pragma solidity ^0.8.19;
 
 import {ProtectionBase} from "../../src/ProtectionBase.sol";
 
+import {Events} from "../utils/Events.sol";
+
 /// @notice Harness contract that enables the testing of {ProtectionBase} internal functions.
 contract ProtectionBaseHarness is ProtectionBase {
+
+   // Emitted when a generic function call succeeds;
+   event CallSucceeded();
 
    function baseInitProtection(address router_, address admin_, bool connectionEstablished_) external {
       _baseInitProtection(router_, admin_, connectionEstablished_);
    }
 
-   function assertShouldProceedWithCall(bytes calldata payload_) external {
-    _assertShouldProceedWithCall(payload_);
+   /// @dev The `msgDataSeed` is unused, and not relative to the {_assertShouldProceedWtihCall}. We
+   ///      only utilize it when fuzzing the msg.data forwarded to the router
+   function assertShouldProceedWithCall(bytes32 msgDataSeed) external payable {
+    // ignore compiler warnings for unused variable.
+    (msgDataSeed);
+    _assertShouldProceedWithCall();
+   }
+
+   function assertShouldProceedWithCall() external {
+    _assertShouldProceedWithCall();
    }
 
    function protectedStorage() external pure returns (ProtectedStorage memory cube3Storage) {
@@ -29,5 +42,9 @@ contract ProtectionBaseHarness is ProtectionBase {
 
    function getMsgValueNonPayable() external view returns (uint256) {
     return _getMsgValue();
+   }
+
+   function cube3ProtectedModifier(bytes calldata payload) external cube3Protected(payload) {
+     emit CallSucceeded();
    }
 }

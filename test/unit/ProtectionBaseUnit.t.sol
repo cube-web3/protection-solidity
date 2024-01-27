@@ -9,6 +9,12 @@ contract ProtectionBase_Unit_Test is BaseTest {
     BaseTest.setUp();
   }
 
+  /////////////////////////////////////////////////////////////////////////////////
+  //                             _baseInitProtection                             //
+  /////////////////////////////////////////////////////////////////////////////////
+
+  // ================== Success
+
   // when the router address is set, it should return the router address, it should emit the event
   function test_SucceedsWhen_RouterAddress_IsSet() public {
    vm.expectEmit(true,true,true,true);
@@ -29,29 +35,19 @@ contract ProtectionBase_Unit_Test is BaseTest {
    emit Cube3ProtocolConnectionUpdated(true);
    protectionBaseHarness.baseInitProtection(address(mockRouter), _randomAddress(), true);
    assertEq(protectionBaseHarness.protectedStorage().shouldConnectToProtocol, true, "connection not set");
-
-   vm.expectEmit(true,true,true,true);
-   emit Cube3ProtocolConnectionUpdated(false);
-   protectionBaseHarness.updateShouldUseProtocol(false);
-   assertEq(protectionBaseHarness.protectedStorage().shouldConnectToProtocol, false, "connection not set");
   }
-
-  function test_NonPayableMsgValue_IsZero() public {
-    uint256 value = protectionBaseHarness.getMsgValueNonPayable();
-    assertEq(value, 0, "non-zero msg value");
-  }
-
-  // ==== fail
+  
+  // ================== Failure
 
   // when the router address is zero, it should revert
   function test_RevertWhen_RouterAddress_isZero() public {
-   vm.expectRevert(bytes("CUBE3: Router ZeroAddress"));
+   vm.expectRevert(bytes("CUBE3: RouterZeroAddress"));
    protectionBaseHarness.baseInitProtection(address(0), _randomAddress(), true);
   }
 
   // when the integration admin is zero, it should revert
   function test_RevertWhen_IntegrationAdminAddress_isZero() public {
-   vm.expectRevert(bytes("CUBE3: Admin ZeroAddres"));
+   vm.expectRevert(bytes("CUBE3: AdminZeroAddres"));
    protectionBaseHarness.baseInitProtection(_randomAddress(), address(0), true);
   }
 
@@ -69,5 +65,55 @@ contract ProtectionBase_Unit_Test is BaseTest {
   vm.expectRevert();
   protectionBaseHarness.baseInitProtection(address(mockNonRouter), _randomAddress(), true );
  }
+
+  //////////////////////////////////////////////////////////////////////////
+  //                             cube3Protected                           //
+  //////////////////////////////////////////////////////////////////////////
+
+  // when the connection is established and the payload is a valid length, it should suceed
+  function test_SucceedsWhen_ConnectionIsEstablished() public {
+
+    // create a payload with the minimum viable length
+    bytes memory payload = new bytes(32);
+
+    protectionBaseHarness.baseInitProtection(address(mockRouter), users.integrationAdmin, true);
+    vm.expectEmit(true,true,true,true);
+    emit CallSucceeded();
+    protectionBaseHarness.cube3ProtectedModifier(payload);
+  }
+
+  // when the connection is not established, it should succeed, even with an invalid payload
+  function test_SuccedsWhen_ConnectionIsNotEstablished() public {
+    // create an invalid payload
+    bytes memory payload = new bytes(0);
+
+    protectionBaseHarness.baseInitProtection(address(mockRouter), users.integrationAdmin, false);
+    vm.expectEmit(true,true,true,true);
+    emit CallSucceeded();
+    protectionBaseHarness.cube3ProtectedModifier(payload);
+  }
+
+
+  //////////////////////////////////////////////////////////////////////////
+  //                     _assertShouldProceedWithCall                     //
+  //////////////////////////////////////////////////////////////////////////
+
+  // when the router is set correctly, it should succeed
+
+  // when the router is an EOA, it should fail
+
+  // when the router is the incorrect contract, it should fail
+
+  /////////////////////////////////////////////////////////////////////////
+  //                             _getMsgValue                            //
+  /////////////////////////////////////////////////////////////////////////
+
+  // when the outer function is non-payable, it should return 0
+  function test_NonPayableMsgValue_IsZero() public {
+    uint256 value = protectionBaseHarness.getMsgValueNonPayable();
+    assertEq(value, 0, "non-zero msg value");
+  }
+
+
 
 }

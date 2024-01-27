@@ -6,6 +6,9 @@ contract MockRouter is Constants {
 
     bool public registrationShouldSucceed;
     bool public routingShouldSucceed;
+    address public msgSender;
+    uint256 public msgValue;
+    bytes public msgData;
 
     mapping(address => address) public mockIntegrationAdmin;
 
@@ -36,11 +39,11 @@ contract MockRouter is Constants {
         address integrationMsgSender,
         uint256 integrationMsgValue,
         bytes calldata integrationCalldata
-    ) external view returns (bytes32) {
-        // prevent compiler warnings
-        (integrationMsgSender);
-        (integrationMsgValue);
-        (integrationCalldata);
+    ) external returns (bytes32) {
+
+        msgSender = integrationMsgSender;
+        msgValue = integrationMsgValue;
+        msgData = integrationCalldata;
 
         if (!routingShouldSucceed) {
             revert("MockRouter: routing failed");
