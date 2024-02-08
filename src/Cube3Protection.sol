@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity >=0.8.19 < 0.8.24;
 
 import { IRouter } from "./interfaces/IRouter.sol";
 
@@ -7,7 +7,7 @@ import { ProtectionBase } from "./ProtectionBase.sol";
 
 /// @notice Inherit this contract to enable access to the CUBE3 Core Protocol and add function-level protection to
 ///         functions by adding the {cube3Protected} modifier to the function.
-/// @dev See {ProtectionBase} for implementation details.
+/// @dev The `cube3Protected` modifier is defined in {ProtectionBase}. Review the contract for implementation details.
 abstract contract Cube3Protection is ProtectionBase {
     /**
      * @dev Passing the zero address as the `integrationAdmin` will set the admin to the deployer by default.

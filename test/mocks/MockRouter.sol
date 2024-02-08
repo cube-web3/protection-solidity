@@ -1,9 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity >=0.8.19 < 0.8.24;
 
-import {Constants} from "../utils/Constants.sol";
+import { Constants } from "../utils/Constants.sol";
+
+/// @notice Mock router contract that emulates the functionality of the CUBE3 router.
 contract MockRouter is Constants {
-
     bool public registrationShouldSucceed;
     bool public routingShouldSucceed;
     address public msgSender;
@@ -35,12 +36,15 @@ contract MockRouter is Constants {
 
         return PRE_REGISTRATION_SUCCEEDED;
     }
+
     function routeToModule(
         address integrationMsgSender,
         uint256 integrationMsgValue,
         bytes calldata integrationCalldata
-    ) external returns (bytes32) {
-
+    )
+        external
+        returns (bytes32)
+    {
         msgSender = integrationMsgSender;
         msgValue = integrationMsgValue;
         msgData = integrationCalldata;
