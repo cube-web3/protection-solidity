@@ -16,14 +16,14 @@ contract ProtectionBaseHarness is ProtectionBase {
 
     /// @dev The `msgDataSeed` is unused, and not relative to the {_assertShouldProceedWtihCall}. We
     ///      only utilize it when fuzzing the msg.data forwarded to the router
-    function assertShouldProceedWithCall(bytes32 msgDataSeed) external payable {
+    function assertShouldProceedAndCall(bytes32 msgDataSeed) external payable {
         // ignore compiler warnings for unused variable.
         (msgDataSeed);
-        _assertShouldProceedWithCall();
+        _assertShouldProceedAndCall();
     }
 
-    function assertShouldProceedWithCall() external {
-        _assertShouldProceedWithCall();
+    function assertShouldProceedAndCall() external {
+        _assertShouldProceedAndCall();
     }
 
     function protectedStorage() external pure returns (ProtectedStorage memory cube3Storage) {

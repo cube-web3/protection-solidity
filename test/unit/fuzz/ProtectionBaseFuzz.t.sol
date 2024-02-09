@@ -25,7 +25,7 @@ contract ProtectionBase_Fuzz_Unit_Test is BaseTest {
     }
 
     //////////////////////////////////////////////////////////////////////////
-    //                     _assertShouldProceedWithCall                     //
+    //                     _assertShouldProceedAndCall                     //
     //////////////////////////////////////////////////////////////////////////
 
     // should receive the correct msg.sender, msg.value, and msg.data when the router is set
@@ -38,14 +38,14 @@ contract ProtectionBase_Fuzz_Unit_Test is BaseTest {
 
         bytes32 msgDataSeed = keccak256(abi.encode(msgValue));
         vm.startPrank(msgSender);
-        protectionBaseHarness.assertShouldProceedWithCall{ value: msgValue }(msgDataSeed);
+        protectionBaseHarness.assertShouldProceedAndCall{ value: msgValue }(msgDataSeed);
         vm.stopPrank();
 
         assertEq(mockRouter.msgValue(), msgValue, "value not matching");
         assertEq(mockRouter.msgSender(), msgSender, "sender not matching");
         assertEq(
             mockRouter.msgData(),
-            abi.encodeWithSignature("assertShouldProceedWithCall(bytes32)", msgDataSeed),
+            abi.encodeWithSignature("assertShouldProceedAndCall(bytes32)", msgDataSeed),
             "msg.data not matching"
         );
     }
@@ -72,6 +72,6 @@ contract ProtectionBase_Fuzz_Unit_Test is BaseTest {
         vm.expectEmit(true, true, true, true);
         emit Cube3ProtocolConnectionUpdated(flag);
         protectionBaseHarness.updateShouldUseProtocol(flag);
-        assertEq(protectionBaseHarness.protectedStorage().shouldConnectToProtocol, flag, "connection not set");
+        assertEq(protectionBaseHarness.protectedStorage().shouldCheckFnProtection, flag, "connection not set");
     }
 }

@@ -16,9 +16,11 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
 
     // when the router address is set, it should return the router address, it should emit the event
     function test_SucceedsWhen_RouterAddress_IsSet() public {
+        address admin = _randomAddress();
+        bool connectionEnabled = true;
         vm.expectEmit(true, true, true, true);
-        emit Cube3ProtectionRouterUpdated(address(mockRouter));
-        protectionBaseHarness.baseInitProtection(address(mockRouter), _randomAddress(), true);
+        emit Cube3IntegrationDeployed(admin, address(mockRouter), connectionEnabled);
+        protectionBaseHarness.baseInitProtection(address(mockRouter), admin, connectionEnabled);
         assertEq(protectionBaseHarness.protectedStorage().router, address(mockRouter), "router not set");
     }
 
@@ -35,20 +37,20 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
         vm.expectEmit(true, true, true, true);
         emit Cube3ProtocolConnectionUpdated(true);
         protectionBaseHarness.baseInitProtection(address(mockRouter), _randomAddress(), true);
-        assertEq(protectionBaseHarness.protectedStorage().shouldConnectToProtocol, true, "connection not set");
+        assertEq(protectionBaseHarness.protectedStorage().shouldCheckFnProtection, true, "connection not set");
     }
 
     // ================== Failure
 
     // when the router address is zero, it should revert
     function test_RevertWhen_RouterAddress_isZero() public {
-        vm.expectRevert(bytes("CUBE3: RouterZeroAddress"));
+        vm.expectRevert(Cube3Protection_InvalidRouter.selector);
         protectionBaseHarness.baseInitProtection(address(0), _randomAddress(), true);
     }
 
     // when the integration admin is zero, it should revert
     function test_RevertWhen_IntegrationAdminAddress_isZero() public {
-        vm.expectRevert(bytes("CUBE3: AdminZeroAddres"));
+        vm.expectRevert(Cube3Protection_InvalidRouter.selector);
         protectionBaseHarness.baseInitProtection(_randomAddress(), address(0), true);
     }
 
@@ -94,7 +96,7 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
     }
 
     //////////////////////////////////////////////////////////////////////////
-    //                     _assertShouldProceedWithCall                     //
+    //                     _assertShouldProceedAndCall                     //
     //////////////////////////////////////////////////////////////////////////
 
     // when the router is set correctly, it should succeed

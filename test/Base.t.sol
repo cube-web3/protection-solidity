@@ -12,13 +12,15 @@ import { Utils } from "./utils/Utils.sol";
 
 import { Events } from "./utils/Events.sol";
 
+import { Errors } from "./utils/Errors.sol";
+
 struct Users {
     // Default admin for the integration contract.
     address payable integrationAdmin;
     address payable randomUser;
 }
 
-abstract contract BaseTest is Test, Utils, Events {
+abstract contract BaseTest is Test, Utils, Events, Errors {
     ProtectionBaseHarness internal protectionBaseHarness;
 
     MockRouter internal mockRouter;
