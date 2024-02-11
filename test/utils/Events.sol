@@ -14,6 +14,4 @@ abstract contract Events {
 
     // Emitted when an integration is deployed.
     event Cube3IntegrationDeployed(address indexed integrationAdmin, address router, bool enabledByDefault);
-
-    error Cube3Protection_InvalidAdmin();
 }

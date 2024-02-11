@@ -5,7 +5,7 @@ import { BaseTest } from "../../Base.t.sol";
 
 contract ProtectionBase_Concrete_Unit_Test is BaseTest {
     function setUp() public virtual override {
-        BaseTest.setUp();
+        super.setUp();
     }
 
     /////////////////////////////////////////////////////////////////////////////////
