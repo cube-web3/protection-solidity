@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 < 0.8.24;
 
-import { IRouter } from "../interfaces/IRouter.sol";
+import { ICube3RouterMinimal } from "../interfaces/ICube3RouterMinimal.sol";
 import { ProtectionBase } from "../ProtectionBase.sol";
 
 /// @notice Inherit this contract to enable access to the CUBE3 Core Protocol and add function-level protection to

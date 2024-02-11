@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 < 0.8.24;
 
-import { IRouter } from "./interfaces/IRouter.sol";
+import { ICube3RouterMinimal } from "./interfaces/ICube3RouterMinimal.sol";
 
 /// @dev Function visibility is set to `internal` instead of `private` to allow for testing via
 ///      a harness contract.
@@ -123,8 +123,9 @@ abstract contract ProtectionBase {
         // Interactions: pre-register this integration with the router and set this contract's admin address. This call
         // serves the dual purpose of validating that the correct router address was passed in the constructor and
         // setting the admin.
-        (bool success, bytes memory data) =
-            router.call(abi.encodeWithSelector(IRouter.initiateIntegrationRegistration.selector, (integrationAdmin)));
+        (bool success, bytes memory data) = router.call(
+            abi.encodeWithSelector(ICube3RouterMinimal.initiateIntegrationRegistration.selector, (integrationAdmin))
+        );
         if (!success || abi.decode(data, (bytes32)) != PRE_REGISTRATION_SUCCEEDED) {
             revert Cube3Protection_PreRegistrationFailed();
         }
@@ -136,8 +137,9 @@ abstract contract ProtectionBase {
     /// @dev The payload is not explicitly passed passed to the router as it's implicitly encoded in the msg.data
     /// used to construct the calldata for the `routeToModule` call.
     function _assertShouldProceedAndCall() internal {
-        try IRouter(_cube3Storage().router).routeToModule(msg.sender, _getMsgValue(), msg.data) returns (bytes32 result)
-        {
+        try ICube3RouterMinimal(_cube3Storage().router).routeToModule(msg.sender, _getMsgValue(), msg.data) returns (
+            bytes32 result
+        ) {
             // Checks: the call succeeded with the expected return value.
             if (result != PROCEED_WITH_CALL) {
                 revert Cube3Protection_InvalidRouterReturn();
