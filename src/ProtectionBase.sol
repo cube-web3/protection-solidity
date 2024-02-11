@@ -3,8 +3,11 @@ pragma solidity >=0.8.19 < 0.8.24;
 
 import { ICube3RouterMinimal } from "./interfaces/ICube3RouterMinimal.sol";
 
+/// @title ProtectionBase
+/// @notice Provides all functionality for connecting to the CUBE3 protocol and adding function-level protection
+/// to functions in the derived contract.
 /// @dev Function visibility is set to `internal` instead of `private` to allow for testing via
-///      a harness contract.
+/// a harness contract.
 abstract contract ProtectionBase {
     /////////////////////////////////////////////////////////////////////////
     //                             CONSTANTS                               //
@@ -75,9 +78,9 @@ abstract contract ProtectionBase {
     /////////////////////////////////////////////////////////////////////////
 
     /// @dev Adding this modifier to a function adds the ability to apply function-level protection to the function.
-    /// If the connection to the protocol is established, all calls are diverted to the CUBE3 Router.
-    /// @dev If utilized, the protocol will forward the calldata to the module designated in the payload's routing
-    /// footer.
+    /// If the connection to the protocol is enabled via {ProtectedStorage.shouldCheckFnProtection}, all calls to
+    /// functions decorated with this modifier are forwarded to the CUBE3 Router. If utilized, the protocol will forward
+    /// the calldata to the module designated in the payload's routing bitmap.
     modifier cube3Protected(bytes calldata cube3Payload) {
         // Checks: the payload should be forwared to the CUBE3 protocol.
         if (_cube3Storage().shouldCheckFnProtection) {
@@ -97,12 +100,14 @@ abstract contract ProtectionBase {
     //                             INITIALIZATION                          //
     /////////////////////////////////////////////////////////////////////////
 
-    /**
-     * @dev Called by the derived contract's initializer or constructor to set the router address and integration admin.
-     * @param router The address of the CUBE3 Router contract.
-     * @param integrationAdmin The address of the integration admin. Set and managed by the CUBE3 Router.
-     * @param enabledByDefault If set to true, the connection to the CUBE3 core protocol will be established by default.
-     */
+    /// @notice Initializes the CUBE3 Protection abstraction.
+    /// @dev Called by the derived contract's initializer or constructor to set the router address and integration
+    /// admin.
+    /// Makes an external call to the Router to initiate the registration of this integration.
+    /// @param router The address of the CUBE3 Router proxy contract.
+    /// @param integrationAdmin The address of the integration admin. Set and managed by the CUBE3 Router.
+    /// @param enabledByDefault If set to true, the connection to the CUBE3 core protocol will be established by
+    /// default.
     function _baseInitProtection(address router, address integrationAdmin, bool enabledByDefault) internal {
         // Checks: the router address is provided.
         if (router == address(0)) {
@@ -134,8 +139,11 @@ abstract contract ProtectionBase {
         emit Cube3IntegrationDeployed(integrationAdmin, router, enabledByDefault);
     }
 
-    /// @dev The payload is not explicitly passed passed to the router as it's implicitly encoded in the msg.data
-    /// used to construct the calldata for the `routeToModule` call.
+    /// @notice Determines whether the connection to the CUBE3 protocol is enabled, transmits the calldata
+    /// including the payload to the protocol, and asserts that the call should proceed.
+    /// @dev The payload is not explicitly passed to the router as it's implicitly encoded in the msg.data
+    /// used to construct the calldata for the `routeToModule` call. Will return early if function protection
+    /// is disabled for the top-level function call.
     function _assertShouldProceedAndCall() internal {
         try ICube3RouterMinimal(_cube3Storage().router).routeToModule(msg.sender, _getMsgValue(), msg.data) returns (
             bytes32 result
@@ -157,15 +165,17 @@ abstract contract ProtectionBase {
     //                              STORAGE                                //
     /////////////////////////////////////////////////////////////////////////
 
-    /// @dev WARNING: This MUST only be called within an external/public fn by an account with elevated privileges.
-    /// @dev If the derived contract has no access control, this function should not be exposed and the connection
-    ///      to the protocol is locked at the time of deployment.
+    /// @notice Determins whether a call should be made to the CUBE3 Protocol to check the protection status of
+    /// of function of the top-level call.
+    /// @dev WARNING: This MUST only be called within an external/public with some form of access control.
+    /// If the derived contract has no access control, this function should not be exposed and the connection
+    /// to the protocol is locked at the time of deployment.
     function _updateShouldUseProtocol(bool connectToProtocol) internal {
         _cube3Storage().shouldCheckFnProtection = connectToProtocol;
         emit Cube3ProtocolConnectionUpdated(connectToProtocol);
     }
 
-    // TODO: test the correct slot is returned
+    /// @notice Returns a pointer to the contract's storage.
     /// @dev Convenience function that returns a storage pointer to CUBE3 protection storage.
     function _cube3Storage() internal pure returns (ProtectedStorage storage cube3Storage) {
         assembly {
@@ -173,7 +183,8 @@ abstract contract ProtectionBase {
         }
     }
 
-    /// @dev Helper function as a non-payable function cannot read msg.value in the modifier.
+    /// @notice Helper function to retrieve the call's `msg.value`.
+    /// @dev A non-payable function cannot read msg.value in the {cube3Protected} modifier.
     /// Will not clash with `_msgValue` in the event that the derived contract inherits {Context}.
     function _getMsgValue() internal view returns (uint256) {
         return msg.value;

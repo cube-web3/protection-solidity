@@ -20,8 +20,9 @@ interface ICube3RouterMinimal {
     /// is transferred in this call.
     /// @param integrationMsgSender The `msg.sender` of the top-level call.
     /// @param integrationMsgValue The `msg.value` of the top-level call.
-    /// @return The hashed representation of PROCEED_WITH_CALL if the module call succeeds, protection for the function
-    /// is disabled, or this integration's registration status is disabled. Otherwise, the call will revert.
+    /// @return The hashed representation of PROCEED_WITH_CALL if function protection is enabled and the module call
+    /// succeeds, protection for the function is disabled, or this integration's registration status is disabled.
+    /// Otherwise, the call will revert.
     function routeToModule(
         address integrationMsgSender,
         uint256 integrationMsgValue,
