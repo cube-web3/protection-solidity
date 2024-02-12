@@ -5,6 +5,7 @@ import { ICube3RouterMinimal } from "./interfaces/ICube3RouterMinimal.sol";
 
 import { ProtectionBase } from "./ProtectionBase.sol";
 
+/// @title Cube3Protection
 /// @notice Provides access to the CUBE3 Core Protocol and adds function-level protection to
 /// functions by adding the {cube3Protected} modifier any functions in the derived contract.
 /// @dev The `cube3Protected` modifier is defined in {ProtectionBase}. Review the contract for implementation details.

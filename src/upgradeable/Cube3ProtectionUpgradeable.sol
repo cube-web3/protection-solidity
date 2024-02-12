@@ -8,10 +8,12 @@ import { ProtectionBase } from "../ProtectionBase.sol";
 /// @notice Upgradeable implementation of the ProtectionBase contract. This contract enables access for the
 /// derived contract to the CUBE3 Core Protocol and adds function-level protection functionality to any external
 /// functions in the derived contract through the {cube3Protected} modifier.
-/// @dev Implements the abstract {ProtectionBase} contract, which utilizes ERC7201 namespaces for storage layout to
+///
+/// Notes:
+/// - Implements the abstract {ProtectionBase} contract, which utilizes ERC7201 namespaces for storage layout to
 /// prevent storage collisions across upgrades.
-/// @dev The initialize functions should be called in the derived contract's initializer.
-/// @dev See {ProtectionBase} for implementation details.
+/// - The initialize functions should be called in the derived contract's initializer.
+/// - See {ProtectionBase} for implementation details.
 abstract contract Cube3ProtectionUpgradeable is ProtectionBase {
     /// @notice Initialized the CUBE3 Protection abstraction.
     /// @dev The `integrationAdmin` is the account granted elevated privileges on the CUBE3 Router. The Integration's

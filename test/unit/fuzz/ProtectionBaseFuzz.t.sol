@@ -20,7 +20,7 @@ contract ProtectionBase_Fuzz_Unit_Test is BaseTest {
         bytes memory payload = new bytes(length);
 
         protectionBaseHarness.baseInitProtection(address(mockRouter), users.integrationAdmin, true);
-        vm.expectRevert(bytes("CUBE3: PayloadLength"));
+        vm.expectRevert(Cube3Protection_InvalidPayloadSize.selector);
         protectionBaseHarness.cube3ProtectedModifier(payload);
     }
 

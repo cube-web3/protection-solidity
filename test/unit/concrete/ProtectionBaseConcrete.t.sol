@@ -34,9 +34,10 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
 
     // when the router is the correct address, the call should succeed
     function test_SucceedsWhen_SetConnectToProtocol() public {
+        address integrationAdmin = _randomAddress();
         vm.expectEmit(true, true, true, true);
-        emit Cube3ProtocolConnectionUpdated(true);
-        protectionBaseHarness.baseInitProtection(address(mockRouter), _randomAddress(), true);
+        emit Cube3IntegrationDeployed(integrationAdmin, address(mockRouter), true);
+        protectionBaseHarness.baseInitProtection(address(mockRouter), integrationAdmin, true);
         assertEq(protectionBaseHarness.protectedStorage().shouldCheckFnProtection, true, "connection not set");
     }
 
@@ -50,7 +51,7 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
 
     // when the integration admin is zero, it should revert
     function test_RevertWhen_IntegrationAdminAddress_isZero() public {
-        vm.expectRevert(Cube3Protection_InvalidRouter.selector);
+        vm.expectRevert(Cube3Protection_InvalidAdmin.selector);
         protectionBaseHarness.baseInitProtection(_randomAddress(), address(0), true);
     }
 

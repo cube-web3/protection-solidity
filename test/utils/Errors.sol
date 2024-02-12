@@ -5,4 +5,5 @@ abstract contract Errors {
     error Cube3Protection_InvalidRouter();
     error Cube3Protection_PreRegistrationFailed();
     error Cube3Protection_InvalidAdmin();
+    error Cube3Protection_InvalidPayloadSize();
 }
