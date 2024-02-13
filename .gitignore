@@ -11,5 +11,7 @@ out/
 docs/
 coverage/
 
+.DS_Store
+
 # Dotenv file
 .env
