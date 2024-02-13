@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.19 < 0.8.24;
-
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Utils.sol";
 import "@openzeppelin/contracts/proxy/ERC1967/ERC1967Proxy.sol";
 
@@ -13,7 +12,6 @@ import { MockUpgradeable, MockUpgradeableV2 } from "../../mocks/MockUpgradeable.
 contract ProtectionBase_Concrete_Unit_Test is BaseTest {
     MockUpgradeable mockUpgradeableImpl;
     MockUpgradeableV2 mockUpgradeableImplV2;
-
     ERC1967Proxy mockUpgradeableProxy;
 
     function setUp() public virtual override {
