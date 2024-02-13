@@ -104,6 +104,8 @@ Once dependencies are installed, you can run the test suite via:
 forge test -vvv
 ```
 
+More comprehensive integration tests are available in the [Core Protocol Repo](https://github.com/cube-web3/protocol-core-solidity/tree/main/test/foundry/integration).
+
 ## EVM Compatibility
 
 The [CUBE3 Core Protocol](https://github.com/cube-web3/protocol-core-solidity) will be deployed on multiple EVM-compatible chains. Not all EVM chains support the `PUSH0` opcode introduced in the `Shanghai` upgrade. You can read more [here](https://soliditylang.org/blog/2023/05/10/solidity-0.8.20-release-announcement/) about the changes introduced in Solidity `0.8.20`. To deploy on a chain that does not support the `PUSH0` opcode, you will need to compile the contracts with the `--evm-version` flag set to `paris`. For example:
