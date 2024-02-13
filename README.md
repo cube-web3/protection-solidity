@@ -90,6 +90,49 @@ contract MyContractUpgradeable is Cube3ProtectionUpgradeable, UUPSUpgradeable, O
 
 ## Registration
 
+To complete registration of an integration on-chain, a `registrarToken` is required. This can be generated when signing up for [CUBE3.ai services](https://cube3.ai).
+
+Below is an example of calling the `registerIntegrationWithCube3` function on the CUBE3 Router.
+
+```typescript
+import { ethers } from "ethers";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const routerABI = [
+    /* ABI of the CUBE3 Router */
+];
+const contractAddress = "/* Your smart contract address */";
+const cube3RouterAddress = "/* CUBE3 Router Address */";
+const securityAdminPrivateKey = process.env.SECURITY_ADMIN_PVT_KEY;
+const provider = new ethers.providers.JsonRpcProvider("/* Your Ethereum node URL */");
+
+// This should be the same account set as the `integrationAdmin` when deploying the integration
+const wallet = new ethers.Wallet(securityAdminPrivateKey, provider);
+
+const registrarToken = process.env.REGISTRAR_TOKEN; // acquired from CUBE3
+
+async function callRegisterIntegrationWithCube3() {
+    const contract = new ethers.Contract(cube3RouterAddress, routerABI, wallet);
+    const enabledByDefaultFnSelectors: bytes4[] = [];
+
+    try {
+        const tx = await contract.registerIntegrationWithCube3(
+            contractAddress,
+            registrarToken,
+            enabledByDefaultFnSelectors
+        );
+        const receipt = await tx.wait();
+        console.log("Transaction successful:", receipt);
+    } catch (error) {
+        console.error("Transaction failed:", error);
+    }
+}
+
+callRegisterIntegrationWithCube3();
+```
+
 ## Testing
 
 To run the tests, you will need to install the dependencies:
@@ -103,6 +146,10 @@ Once dependencies are installed, you can run the test suite via:
 ```bash
 forge test -vvv
 ```
+
+More comprehensive integration tests are available in the [Core Protocol Repo](https://github.com/cube-web3/protocol-core-solidity/tree/main/test/foundry/integration).
+
+##
 
 ## EVM Compatibility
 
