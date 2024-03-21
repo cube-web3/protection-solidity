@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 < 0.8.24;
+pragma solidity >=0.8.19 <0.8.24;
 
-import { ICube3RouterMinimal } from "./interfaces/ICube3RouterMinimal.sol";
+import {ICube3RouterMinimal} from "./interfaces/ICube3RouterMinimal.sol";
 
 /// @title ProtectionBase
 /// @notice Provides all functionality for connecting to the CUBE3 protocol and adding function-level protection
@@ -14,10 +14,12 @@ abstract contract ProtectionBase {
     /////////////////////////////////////////////////////////////////////////
 
     // Expected hashed return value from the router indicating the call is safe to proceed.
-    bytes32 private constant PROCEED_WITH_CALL = keccak256("CUBE3_PROCEED_WITH_CALL");
+    bytes32 private constant PROCEED_WITH_CALL =
+        keccak256("CUBE3_PROCEED_WITH_CALL");
 
     // Expected hashed return value from the router indicating the pre-registration and setting of the admin succeeded.
-    bytes32 private constant PRE_REGISTRATION_SUCCEEDED = keccak256("CUBE3_PRE_REGISTRATION_SUCCEEDED");
+    bytes32 private constant PRE_REGISTRATION_SUCCEEDED =
+        keccak256("CUBE3_PRE_REGISTRATION_SUCCEEDED");
 
     // ERC7201 namespace derivation for storage layout.
     // keccak256(abi.encode(uint256(keccak256("cube3.storage")) - 1)) & ~bytes32(uint256(0xff));
@@ -38,7 +40,11 @@ abstract contract ProtectionBase {
     event Cube3ProtocolConnectionUpdated(bool connectionEstablished);
 
     /// @notice Emitted when this integration is deployed.
-    event Cube3IntegrationDeployed(address indexed integrationAdmin, address router, bool enabledByDefault);
+    event Cube3IntegrationDeployed(
+        address indexed integrationAdmin,
+        address router,
+        bool enabledByDefault
+    );
 
     /////////////////////////////////////////////////////////////////////////
     //                             ERRORS                                  //
@@ -102,13 +108,17 @@ abstract contract ProtectionBase {
 
     /// @notice Initializes the CUBE3 Protection abstraction.
     /// @dev Called by the derived contract's initializer or constructor to set the router address and integration
-    /// admin.
+    /// admin.  The call will revert if the correct router address is not supplied due to check on the returned value.
     /// Makes an external call to the Router to initiate the registration of this integration.
     /// @param router The address of the CUBE3 Router proxy contract.
     /// @param integrationAdmin The address of the integration admin. Set and managed by the CUBE3 Router.
     /// @param enabledByDefault If set to true, the connection to the CUBE3 core protocol will be established by
     /// default.
-    function _baseInitProtection(address router, address integrationAdmin, bool enabledByDefault) internal {
+    function _baseInitProtection(
+        address router,
+        address integrationAdmin,
+        bool enabledByDefault
+    ) internal {
         // Checks: the router address is provided.
         if (router == address(0)) {
             revert Cube3Protection_InvalidRouter();
@@ -127,16 +137,15 @@ abstract contract ProtectionBase {
 
         // Interactions: pre-register this integration with the router and set this contract's admin address. This call
         // serves the dual purpose of validating that the correct router address was passed in the constructor and
-        // setting the admin.
-        (bool success, bytes memory data) = router.call(
-            abi.encodeWithSelector(ICube3RouterMinimal.initiateIntegrationRegistration.selector, (integrationAdmin))
-        );
-        if (!success || abi.decode(data, (bytes32)) != PRE_REGISTRATION_SUCCEEDED) {
-            revert Cube3Protection_PreRegistrationFailed();
-        }
+        // setting this integration's admin account on the protocol.
+        _assertPreRegistrationSucceeds(router, integrationAdmin);
 
         // Log: the creation of the integration and the default config.
-        emit Cube3IntegrationDeployed(integrationAdmin, router, enabledByDefault);
+        emit Cube3IntegrationDeployed(
+            integrationAdmin,
+            router,
+            enabledByDefault
+        );
     }
 
     /// @notice Determines whether the connection to the CUBE3 protocol is enabled, transmits the calldata
@@ -145,12 +154,41 @@ abstract contract ProtectionBase {
     /// used to construct the calldata for the `routeToModule` call. Will return early if function protection
     /// is disabled for the top-level function call.
     function _assertShouldProceedAndCall() internal {
-        try ICube3RouterMinimal(_cube3Storage().router).routeToModule(msg.sender, _getMsgValue(), msg.data) returns (
-            bytes32 result
-        ) {
+        try
+            ICube3RouterMinimal(_cube3Storage().router).routeToModule(
+                msg.sender,
+                _getMsgValue(),
+                msg.data
+            )
+        returns (bytes32 result) {
             // Checks: the call succeeded with the expected return value.
             if (result != PROCEED_WITH_CALL) {
                 revert Cube3Protection_InvalidRouterReturn();
+            }
+            return;
+        } catch (bytes memory revertData) {
+            // Bubble up the revert data to capture the original error from the protocol.
+            assembly {
+                revert(add(revertData, 0x20), mload(revertData))
+            }
+        }
+    }
+
+    /// @notice Ensures the correct `router` address is set and initiates the registration of this integration,
+    /// while simultaneously setting this integration's admin account on the protocol.
+    /// @dev Will revert if the correct router address is not supplied or the admin account is the zero address.
+    /// @param router The address of the CUBE3 Router proxy contract.
+    /// @param admin The admin account for this contract from the CUBE3 Protocol's perspective.
+    function _assertPreRegistrationSucceeds(
+        address router,
+        address admin
+    ) internal {
+        try
+            ICube3RouterMinimal(router).initiateIntegrationRegistration(admin)
+        returns (bytes32 result) {
+            // Checks: the call succeeded with the expected return value.
+            if (result != PRE_REGISTRATION_SUCCEEDED) {
+                revert Cube3Protection_PreRegistrationFailed();
             }
             return;
         } catch (bytes memory revertData) {
@@ -177,7 +215,11 @@ abstract contract ProtectionBase {
 
     /// @notice Returns a pointer to the contract's storage.
     /// @dev Convenience function that returns a storage pointer to CUBE3 protection storage.
-    function _cube3Storage() internal pure returns (ProtectedStorage storage cube3Storage) {
+    function _cube3Storage()
+        internal
+        pure
+        returns (ProtectedStorage storage cube3Storage)
+    {
         assembly {
             cube3Storage.slot := CUBE3_PROTECTED_STORAGE_LOCATION
         }
