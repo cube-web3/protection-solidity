@@ -1,6 +1,7 @@
 # Compiler files
 cache/
 out/
+forge-cache/
 
 # Ignores development broadcast logs
 !/broadcast
@@ -15,3 +16,4 @@ coverage/
 
 # Dotenv file
 .env
+
