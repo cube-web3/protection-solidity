@@ -133,7 +133,7 @@ abstract contract ProtectionBase {
         _cube3Storage().router = router;
 
         // Enable/disable the connection to the CUBE3 core protocol.
-        _cube3Storage().shouldCheckFnProtection = enabledByDefault;
+        _updateShouldUseProtocol(enabledByDefault);
 
         // Interactions: pre-register this integration with the router and set this contract's admin address. This call
         // serves the dual purpose of validating that the correct router address was passed in the constructor and
