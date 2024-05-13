@@ -102,6 +102,14 @@ abstract contract ProtectionBase {
         _;
     }
 
+    /// @notice Indicates whether this integration contract is connected to the CUBE3 protocol.
+    /// @dev When this function returns true, this integration will route calls to the CUBE3 protocol when
+    /// the `cube3Protected` modifier is applied to a function. When false, the function will execute as normal.
+    /// @return The connection status to the CUBE3 protocol.
+    function connectedToCUBE3() public view returns (bool) {
+        return _cube3Storage().shouldCheckFnProtection;
+    }
+
     /////////////////////////////////////////////////////////////////////////
     //                             INITIALIZATION                          //
     /////////////////////////////////////////////////////////////////////////
