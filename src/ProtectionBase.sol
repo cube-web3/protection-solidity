@@ -33,16 +33,17 @@ abstract contract ProtectionBase {
     //                             EVENTS                                  //
     /////////////////////////////////////////////////////////////////////////
 
-    /// @notice Emitted when the CUBE3 router address is updated.
-    event Cube3ProtectionRouterUpdated(address newRouter);
-
     /// @notice Emitted when the connection to the CUBE3 protocol is updated.
+    /// @param connectionEstablished When True, means the connection to the Protocol is established
+    /// and transaction data will be forwarded to the router and function protection status will be checked.
     event Cube3ProtocolConnectionUpdated(bool connectionEstablished);
 
     /// @notice Emitted when this integration is deployed.
+    /// @param integrationAdmin The account designated as the account's admin account on the router.
+    /// This account can complete the integration registration and update function protection status.
+    /// @param enabledByDefault Whether the Integration is connected to the Protocol by default.
     event Cube3IntegrationDeployed(
         address indexed integrationAdmin,
-        address router,
         bool enabledByDefault
     );
 
@@ -83,22 +84,17 @@ abstract contract ProtectionBase {
     //                             MODIFIERS                               //
     /////////////////////////////////////////////////////////////////////////
 
+    /// @notice Adds function-level protection to the function.
     /// @dev Adding this modifier to a function adds the ability to apply function-level protection to the function.
     /// If the connection to the protocol is enabled via {ProtectedStorage.shouldCheckFnProtection}, all calls to
     /// functions decorated with this modifier are forwarded to the CUBE3 Router. If utilized, the protocol will forward
     /// the calldata to the module designated in the payload's routing bitmap.
+    /// @dev Will revert if the payload fails any security checks.
     modifier cube3Protected(bytes calldata cube3Payload) {
-        // Checks: the payload should be forwared to the CUBE3 protocol.
-        if (_cube3Storage().shouldCheckFnProtection) {
-            // Checks: the payload meets the minimum criteria.
-            if (cube3Payload.length < MINIMUM_PAYLOAD_LENGTH_BYTES) {
-                revert Cube3Protection_InvalidPayloadSize();
-            }
-
-            // Interactions: forward the calldata, including the payload, along with the call context, to the CUBE3
-            // protocol where it will be routed to the desired security module.
-            _assertShouldProceedAndCall();
-        }
+        // If connected to the CUBE3 protocol, the function's protection status will
+        // be checked via an external call to the router and forwarded to the relevenat
+        // security module if enabled.
+        _assertProtectWhenConnected(cube3Payload);
         _;
     }
 
@@ -149,11 +145,29 @@ abstract contract ProtectionBase {
         _assertPreRegistrationSucceeds(router, integrationAdmin);
 
         // Log: the creation of the integration and the default config.
-        emit Cube3IntegrationDeployed(
-            integrationAdmin,
-            router,
-            enabledByDefault
-        );
+        emit Cube3IntegrationDeployed(integrationAdmin, enabledByDefault);
+    }
+
+    /////////////////////////////////////////////////////////////////////////
+    //                             PROTECTION LOGIC                        //
+    /////////////////////////////////////////////////////////////////////////
+
+    /// @dev Checks the connection status to the CUBE3 protocol and forwards the calldata to the protocol
+    /// if connected.
+    /// @dev Can be called at the top of the derived contract's external functions directly intead of the modifier to
+    /// reduce codesize from inlining the modifier multiple times.
+    function _assertProtectWhenConnected(bytes calldata cube3Payload) internal {
+        // Checks: the payload should be forwared to the CUBE3 protocol.
+        if (connectedToCUBE3()) {
+            // Checks: the payload meets the minimum criteria.
+            if (cube3Payload.length < MINIMUM_PAYLOAD_LENGTH_BYTES) {
+                revert Cube3Protection_InvalidPayloadSize();
+            }
+
+            // Interactions: forward the calldata, including the payload, along with the call context, to the CUBE3
+            // protocol where it will be routed to the desired security module.
+            _assertShouldProceedAndCall();
+        }
     }
 
     /// @notice Determines whether the connection to the CUBE3 protocol is enabled, transmits the calldata
