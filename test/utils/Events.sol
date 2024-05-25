@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 < 0.8.24;
+pragma solidity >=0.8.19 <0.8.24;
 
 /// @notice Abstract contract containing events emitted by the Protection contracts.
 abstract contract Events {
@@ -13,5 +13,8 @@ abstract contract Events {
     event CallSucceeded();
 
     // Emitted when an integration is deployed.
-    event Cube3IntegrationDeployed(address indexed integrationAdmin, address router, bool enabledByDefault);
+    event Cube3IntegrationDeployed(
+        address indexed integrationAdmin,
+        bool enabledByDefault
+    );
 }
