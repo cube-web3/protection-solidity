@@ -87,8 +87,7 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
 
     // when the router address is the wrong address, it should revert
     function test_RevertWhen_RouterAddress_isEoa() public {
-        // TODO: why doesn't this offer more information?
-        // vm.expectRevert(bytes("CUBE3: PreReg Fail"));
+        // revert data is empty when caught in the catch block
         vm.expectRevert();
         protectionBaseHarness.baseInitProtection(
             _randomAddress(),
@@ -98,8 +97,7 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
     }
 
     function test_RevertWhen_RouterAddress_isWrongContract() public {
-        // TODO: the call doesn't return the expected value, so why doesn't it work?
-        // vm.expectRevert(bytes("CUBE3: PreReg Fail"));
+        // revert data is empty when caught in the catch block
         vm.expectRevert();
         protectionBaseHarness.baseInitProtection(
             address(mockNonRouter),
