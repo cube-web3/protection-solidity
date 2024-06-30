@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 < 0.8.24;
+pragma solidity >=0.8.19 <0.8.24;
 
-import { BaseTest } from "../../Base.t.sol";
+import {BaseTest} from "../../Base.t.sol";
 
 contract ProtectionBase_Concrete_Unit_Test is BaseTest {
     function setUp() public virtual override {
@@ -19,16 +19,30 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
         address admin = _randomAddress();
         bool connectionEnabled = true;
         vm.expectEmit(true, true, true, true);
-        emit Cube3IntegrationDeployed(admin, address(mockRouter), connectionEnabled);
-        protectionBaseHarness.baseInitProtection(address(mockRouter), admin, connectionEnabled);
-        assertEq(protectionBaseHarness.protectedStorage().router, address(mockRouter), "router not set");
+        emit Cube3IntegrationDeployed(admin, connectionEnabled);
+        protectionBaseHarness.baseInitProtection(
+            address(mockRouter),
+            admin,
+            connectionEnabled
+        );
+        assertEq(
+            protectionBaseHarness.protectedStorage().router,
+            address(mockRouter),
+            "router not set"
+        );
     }
 
     // when the integration is set, it should emit the event
     function test_SucceedsWhen_IntegrationAdmin_IsSet() public {
-        protectionBaseHarness.baseInitProtection(address(mockRouter), users.integrationAdmin, true);
+        protectionBaseHarness.baseInitProtection(
+            address(mockRouter),
+            users.integrationAdmin,
+            true
+        );
         assertEq(
-            users.integrationAdmin, mockRouter.mockIntegrationAdmin(address(protectionBaseHarness)), "admin not set"
+            users.integrationAdmin,
+            mockRouter.mockIntegrationAdmin(address(protectionBaseHarness)),
+            "admin not set"
         );
     }
 
@@ -36,9 +50,17 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
     function test_SucceedsWhen_SetConnectToProtocol() public {
         address integrationAdmin = _randomAddress();
         vm.expectEmit(true, true, true, true);
-        emit Cube3IntegrationDeployed(integrationAdmin, address(mockRouter), true);
-        protectionBaseHarness.baseInitProtection(address(mockRouter), integrationAdmin, true);
-        assertEq(protectionBaseHarness.protectedStorage().shouldCheckFnProtection, true, "connection not set");
+        emit Cube3IntegrationDeployed(integrationAdmin, true);
+        protectionBaseHarness.baseInitProtection(
+            address(mockRouter),
+            integrationAdmin,
+            true
+        );
+        assertEq(
+            protectionBaseHarness.protectedStorage().shouldCheckFnProtection,
+            true,
+            "connection not set"
+        );
     }
 
     // ================== Failure
@@ -46,28 +68,42 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
     // when the router address is zero, it should revert
     function test_RevertWhen_RouterAddress_isZero() public {
         vm.expectRevert(Cube3Protection_InvalidRouter.selector);
-        protectionBaseHarness.baseInitProtection(address(0), _randomAddress(), true);
+        protectionBaseHarness.baseInitProtection(
+            address(0),
+            _randomAddress(),
+            true
+        );
     }
 
     // when the integration admin is zero, it should revert
     function test_RevertWhen_IntegrationAdminAddress_isZero() public {
         vm.expectRevert(Cube3Protection_InvalidAdmin.selector);
-        protectionBaseHarness.baseInitProtection(_randomAddress(), address(0), true);
+        protectionBaseHarness.baseInitProtection(
+            _randomAddress(),
+            address(0),
+            true
+        );
     }
 
     // when the router address is the wrong address, it should revert
     function test_RevertWhen_RouterAddress_isEoa() public {
-        // TODO: why doesn't this offer more information?
-        // vm.expectRevert(bytes("CUBE3: PreReg Fail"));
+        // revert data is empty when caught in the catch block
         vm.expectRevert();
-        protectionBaseHarness.baseInitProtection(_randomAddress(), _randomAddress(), true);
+        protectionBaseHarness.baseInitProtection(
+            _randomAddress(),
+            _randomAddress(),
+            true
+        );
     }
 
     function test_RevertWhen_RouterAddress_isWrongContract() public {
-        // TODO: the call doesn't return the expected value, so why doesn't it work?
-        // vm.expectRevert(bytes("CUBE3: PreReg Fail"));
+        // revert data is empty when caught in the catch block
         vm.expectRevert();
-        protectionBaseHarness.baseInitProtection(address(mockNonRouter), _randomAddress(), true);
+        protectionBaseHarness.baseInitProtection(
+            address(mockNonRouter),
+            _randomAddress(),
+            true
+        );
     }
 
     //////////////////////////////////////////////////////////////////////////
@@ -79,7 +115,11 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
         // create a payload with the minimum viable length
         bytes memory payload = new bytes(32);
 
-        protectionBaseHarness.baseInitProtection(address(mockRouter), users.integrationAdmin, true);
+        protectionBaseHarness.baseInitProtection(
+            address(mockRouter),
+            users.integrationAdmin,
+            true
+        );
         vm.expectEmit(true, true, true, true);
         emit CallSucceeded();
         protectionBaseHarness.cube3ProtectedModifier(payload);
@@ -90,7 +130,11 @@ contract ProtectionBase_Concrete_Unit_Test is BaseTest {
         // create an invalid payload
         bytes memory payload = new bytes(0);
 
-        protectionBaseHarness.baseInitProtection(address(mockRouter), users.integrationAdmin, false);
+        protectionBaseHarness.baseInitProtection(
+            address(mockRouter),
+            users.integrationAdmin,
+            false
+        );
         vm.expectEmit(true, true, true, true);
         emit CallSucceeded();
         protectionBaseHarness.cube3ProtectedModifier(payload);

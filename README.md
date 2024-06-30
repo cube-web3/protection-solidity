@@ -7,6 +7,8 @@ In-depth documentation of the services offered by CUBE3 is available at [docs.cu
 
 ## Installation
 
+**Important note:** The CUBE3 Protection contracts do not have any external dependencies. However, Openzeppelin libraries are used in testing.
+
 ### Foundry
 
 ```bash
@@ -21,11 +23,13 @@ Next, add the CUBE3 contracts to your `remappings.txt` file:
 
 ### Steps required to create an integration
 
-Creating an "integration" refers to the process of deploying a contract that inherits from the either of the abstract contracts provided in this repository (`Cube3Protection` or `Cube3ProtectionUpgradeable`) and completing registration on-chain with the CUBE3 protocol. An integration has access to the functionality provided by the CUBE3 Core Protocol's security modules. Enabling access to these modules requires the addition of the `cube3Protected` modifier to the functions you wish to protect. The process of utilizing the services offered by CUBE3 is as follows:
+Creating an "integration" refers to the process of deploying a contract that inherits from the either of the abstract contracts provided in this repository (`Cube3Protection` or `Cube3ProtectionUpgradeable`) and completing registration on-chain with the CUBE3 protocol. An integration has access to the functionality provided by the CUBE3 Core Protocol's security modules. Enabling access to these modules requires the addition of the `cube3Protected` modifier to the functions you wish to protect.
+
+The process of utilizing the services offered by CUBE3 is as follows:
 
 -   Inherit one of the abstract contracts provided in this repository.
--   Decorate desired functions with the `cube3Protected` modifier.
--   Deploy your contract and provide the `integrationAdmin` address to the constructor. See [Security Considerations](#Security Considerations) section for more details about the admin role.
+-   Decorate desired functions with the `cube3Protected` modifier, or include the `_assertProtectWhenConnected` at the top of the function, and ensure that the function signature's last argument is `bytes calldata cube3Payload`.
+-   Deploy your contract and provide the `integrationAdmin` address to the constructor. See [Security Considerations](#Security Considerations) section for more details about the admin account's permissions and responsibilities.
 -   Visit [cube3.ai](https://cube3.ai) to sign up for RASP and complete the registration of your integration by calling `registerIntegrationWithCube3(...)` on the CUBE3 Protocol's Router contract.
 -   Enable function protection for your functions via the `updateFunctionProtectionStatus(...)` on the CUBE3 Protocol's Router contract. (Note: this function is only callable by the integration's admin account.)
 -   Add the CUBE3 SDK to your dDapp and provide your users with the `cube3Payload`, required by the modifier, when submitting transactions on-chain.
@@ -40,6 +44,8 @@ Inherit from either `Cube3Protection` or `Cube3ProtectionUpgradeable` and decora
 
 #### Standalone example
 
+##### Using the modifier
+
 ```solidity
 contract MyContract is Cube3Protection {
 
@@ -50,7 +56,26 @@ contract MyContract is Cube3Protection {
       true // enable the connection to the protocol
      ) {}
 
-    function myFunction(...args, cube3Payload) external cube3Protected(cube3Payload) {
+    function myFunction(...args, bytes calldata cube3Payload) external cube3Protected(cube3Payload) {
+        // Your logic here
+    }
+}
+```
+
+##### Using the inline assertion
+
+```solidity
+contract MyContract is Cube3Protection {
+
+    constructor(address _router)
+     Cube3Protection(
+      _router,
+      msg.sender, // deployer becomes the integrationAdmin
+      true // enable the connection to the protocol
+     ) {}
+
+    function myFunction(...args, bytes calldata cube3Payload) external  {
+        _assertProtectWhenConnected(cube3Payload)
         // Your logic here
     }
 }
@@ -133,6 +158,42 @@ async function callRegisterIntegrationWithCube3() {
 callRegisterIntegrationWithCube3();
 ```
 
+## Updating function protection
+
+// TODO: Add function protection examples
+
+## Connection to the CUBE3 protocol
+
+### Checking the connection status
+
+The CUBE3 payload will only be forwarded to the Router if the connection to the Router is enabled. The can be checked at any time by calling the `connectedToCUBE3()` function on your contract. When this function returns `true`, the payload will be forwarded to the Router. If, and only if, function protection is enabled for the respective function from the top-level call, will the payload be forwarded to the security module designated in the routing portion of the payload.
+
+```typescript
+// example TS function checking an integration's connection to the CUBE3 protocol
+async function checkConnection(): Promise<boolean> {
+    return await myContract.connectedToCUBE3();
+}
+```
+
+### Updating the connection status
+
+Connection to the CUBE3 Protocol can be enabled/disabled, however updating the status **MUST** only be done via an `external`/`public` function with access control restrictions. The connection status is updated via the `internal _updateShouldUseProtocol(...)` inherited from `ProtectionBase.sol`. If this function is exposed without access control, any bad actor can disable the protections offered by the CUBE3 Protocol.
+
+```solidity
+
+/// @notice EXAMPLE OF A CORRECT IMPLEMENTATION
+/// @dev Protected by access control
+function updateCube3Connection(bool shouldConnect) external onlyOwner {
+    _updateShouldUseProtocol(shouldConnect);
+}
+
+/// @notice INCORRECT IMPLEMENTATION
+/// @dev DANGER - any account can disconnect from CUBE3
+function updateCube3Connection(bool shouldConnect) external {
+    _updateShouldUseProtocol(shouldConnect);
+}
+```
+
 ## Testing
 
 To run the tests, you will need to install the dependencies:
@@ -147,7 +208,7 @@ Once dependencies are installed, you can run the test suite via:
 forge test -vvv
 ```
 
-More comprehensive integration tests are available in the [Core Protocol Repo](https://github.com/cube-web3/protocol-core-solidity/tree/main/test/foundry/integration).
+More comprehensive integration tests that utilize the protocol's functionality are available in the [Core Protocol Repo](https://github.com/cube-web3/protocol-core-solidity/tree/main/test/foundry/integration).
 
 ##
 
@@ -163,11 +224,11 @@ forge build --evm-version paris
 
 ### Which contract should I be importing?
 
-Upgrade contracts, or contracts that utilize a proxy pattern, should inherit the `Cube3ProtectionUpgradeable` contract, while non-upgradeable implementations should inherit the `Cube3Protection` contract. Both contracts inherit their logic from the `ProtectionBase` contract, with the primary difference being how the contracts are initialized.
+Upgradeable contracts, or contracts that utilize a proxy pattern, should inherit the `Cube3ProtectionUpgradeable` contract, while non-upgradeable implementations should inherit the `Cube3Protection` contract. Both contracts inherit their logic from the `ProtectionBase` contract, with the primary difference being how the contracts are initialized.
 
 ### Do I have to start using CUBE3 from the moment I deploy my contract?
 
-No, you can start using CUBE3's services at any time after deploying your contract. The `cube3Protected` modifier will check the function protection status once registration has been completed. Even after registering, you can leave protection status for all functions disabled until you are ready to start using CUBE3's services.
+No, you can start using CUBE3's services at any time after deploying your contract. The `cube3Protected` modifier, and inline `_assertProtectWhenConnected` function, will check the function protection status once registration has been completed. Even after registering, you can leave protection status for all functions disabled until you are ready to start using CUBE3's services.
 
 ### What happens if I stop using CUBE3's services?
 
@@ -179,4 +240,23 @@ You have two options for disconnecting from CUBE3's services:
 
 ### What is the contract size of the inheritable contracts?
 
-The `ProtectionBase` contract is around ~2kb.
+The `Cube3Protection` contract is around ~1.55kb.
+
+### Should I be using the modifier, or the inline assertion, or both?
+
+For any function that you wish to protect, you should us either the modifier **OR** the inline assertion, **BUT NOT** both.
+
+The considerations for choosing either are as follows:
+
+**Modifiers vs. Inline Assertions:**
+
+-   Modifiers: Modifiers are a way to reuse code before and/or after a function's execution. When a modifier is used, Solidity effectively copies the modifier's code into the function's body at compile time. This can lead to increased bytecode size, especially if the modifier is used excessively.
+
+-   Inline Assertions: Inline assertions (e.g., require statements) are placed directly within the function body. They do not increase the bytecode size as much as modifiers do because they are not duplicated across multiple functions.
+
+**Code Size Considerations:**
+
+Solidity has a maximum contract size limit (24KB).
+By using inline assertions instead of modifiers, you reduce the risk of hitting the bytecode size limit because the assertion logic is not duplicated.
+
+By calling the internal function within the function body, it results in a `JUMP` opcode, which is more efficient compared to the duplication of modifier logic whereby the same code is included in the bytecode multiple times.
