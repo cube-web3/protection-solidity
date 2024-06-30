@@ -1,0 +1,36 @@
+{
+    "name": "@cube-web3/protection-solidity",
+    "version": "1.0.0",
+    "description": "Smart contract abstractions for integrating with CUBE3 Core Protocol",
+    "main": "index.js",
+    "directories": {
+        "lib": "lib",
+        "test": "test"
+    },
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git@github.com:cube-web3/protection-solidity.git"
+    },
+    "keywords": [
+        "smart",
+        "contracts",
+        "solidity",
+        "rasp"
+    ],
+    "homepage": "https://cube3.ai",
+    "publishConfig": {
+        "registry": "https://npm.pkg.github.com"
+    },
+    "author": "CUBE3.ai",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/cube-web3/protection-solidity/issues"
+    },
+    "files": [
+        "src",
+        "test"
+    ]
+}

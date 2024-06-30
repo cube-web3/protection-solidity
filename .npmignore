@@ -1,0 +1,5 @@
+node_modules/
+.github/
+.env
+TODOS.md
+hardhat.config.js
