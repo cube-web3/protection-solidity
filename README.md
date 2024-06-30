@@ -7,6 +7,8 @@ In-depth documentation of the services offered by CUBE3 is available at [docs.cu
 
 ## Installation
 
+**Important note:** The CUBE3 Protection contracts do not have any external dependencies. However, Openzeppelin libraries are used in testing.
+
 ### Foundry
 
 ```bash
@@ -156,6 +158,10 @@ async function callRegisterIntegrationWithCube3() {
 callRegisterIntegrationWithCube3();
 ```
 
+## Updating function protection
+
+// TODO: Add function protection examples
+
 ## Connection to the CUBE3 protocol
 
 ### Checking the connection status
@@ -202,7 +208,7 @@ Once dependencies are installed, you can run the test suite via:
 forge test -vvv
 ```
 
-More comprehensive integration tests are available in the [Core Protocol Repo](https://github.com/cube-web3/protocol-core-solidity/tree/main/test/foundry/integration).
+More comprehensive integration tests that utilize the protocol's functionality are available in the [Core Protocol Repo](https://github.com/cube-web3/protocol-core-solidity/tree/main/test/foundry/integration).
 
 ##
 

@@ -3,6 +3,20 @@ pragma solidity >=0.8.19 <0.8.24;
 
 import {Cube3Protection} from "../../src/Cube3Protection.sol";
 
+/// @dev This mock contract is only used to establish the contract size of the Cube3Protection contract
+/// by means of a codesize comparison.
+contract Mock {
+    event Success();
+
+    function mock() external {
+        emit Success();
+    }
+
+    function mockInline() external {
+        emit Success();
+    }
+}
+
 contract MockIntegration is Cube3Protection {
     event Success();
     constructor(
