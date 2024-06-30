@@ -240,7 +240,7 @@ You have two options for disconnecting from CUBE3's services:
 
 ### What is the contract size of the inheritable contracts?
 
-The `ProtectionBase` contract is around ~2kb.
+The `Cube3Protection` contract is around ~1.55kb.
 
 ### Should I be using the modifier, or the inline assertion, or both?
 
