@@ -155,12 +155,64 @@ async function callRegisterIntegrationWithCube3() {
     }
 }
 
-callRegisterIntegrationWithCube3();
+await callRegisterIntegrationWithCube3();
 ```
 
 ## Updating function protection
 
-// TODO: Add function protection examples
+```typescript
+import { ethers } from "ethers";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const routerABI = [
+    /* ABI of the CUBE3 Router */
+];
+const contractAddress = "/* Your smart contract address */";
+const cube3RouterAddress = "/* CUBE3 Router Address */";
+const integrationAdminPrivateKey = process.env.INTEGRATION_ADMIN_PVT_KEY;
+const provider = new ethers.providers.JsonRpcProvider("/* Your Ethereum node URL */");
+
+// This should be the same account set as the `integrationAdmin` when deploying the integration
+const adminSigner = new ethers.Wallet(integrationAdminPrivateKey, provider);
+
+// Create contract instance
+const routerContract = new ethers.Contract(routerAddress, routerABI, adminSigner);
+
+// Define the FunctionProtectionStatusUpdate struct
+interface FunctionProtectionStatusUpdate {
+    fnSelector: string;
+    protectionEnabled: boolean;
+}
+
+const updates: FunctionProtectionStatusUpdate[] = [
+    {
+        fnSelector: "0x12345678",
+        protectionEnabled: true,
+    },
+    {
+        fnSelector: "0x87654321",
+        protectionEnabled: false,
+    },
+];
+
+(async () => {
+    try {
+        // Call the updateFunctionProtectionStatus function
+        const tx = await routerContract.updateFunctionProtectionStatus(integrationAddress, updates);
+
+        // Wait for the transaction to be mined
+        const receipt = await tx.wait();
+
+        console.log("Transaction successful!");
+        console.log("Transaction hash:", receipt.hash);
+        console.log("Block number:", receipt.blockNumber);
+    } catch (error) {
+        console.error("Error updating function protection status:", error);
+    }
+})();
+```
 
 ## Connection to the CUBE3 protocol
 
