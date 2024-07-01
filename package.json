@@ -1,6 +1,6 @@
 {
     "name": "@cube-web3/protection-solidity",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "description": "Smart contract abstractions for integrating with CUBE3 Core Protocol",
     "main": "index.js",
     "directories": {
