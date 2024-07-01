@@ -21,6 +21,13 @@ Next, add the CUBE3 contracts to your `remappings.txt` file:
 @cube3/=lib/cube-web3/protection-solidity/src/
 ```
 
+### NPM / Yarn
+
+```bash
+npm install @cube-web3/protection-solidity
+yarn install @cube-web3/protection-solidity
+```
+
 ### Steps required to create an integration
 
 Creating an "integration" refers to the process of deploying a contract that inherits from the either of the abstract contracts provided in this repository (`Cube3Protection` or `Cube3ProtectionUpgradeable`) and completing registration on-chain with the CUBE3 protocol. An integration has access to the functionality provided by the CUBE3 Core Protocol's security modules. Enabling access to these modules requires the addition of the `cube3Protected` modifier to the functions you wish to protect.
