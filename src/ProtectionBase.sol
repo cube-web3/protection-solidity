@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 <0.8.24;
+pragma solidity >=0.8.19 < 0.9.0;
 
 import {ICube3RouterMinimal} from "./interfaces/ICube3RouterMinimal.sol";
 
@@ -25,9 +25,6 @@ abstract contract ProtectionBase {
     // keccak256(abi.encode(uint256(keccak256("cube3.storage")) - 1)) & ~bytes32(uint256(0xff));
     bytes32 private constant CUBE3_PROTECTED_STORAGE_LOCATION =
         0xd26911dcaedb68473d1e75486a92f0a8e6ef3479c0c1c4d6684d3e2888b6b600;
-
-    // The minimum payload length is equivalent to the payload routing bitmap (uint256) size.
-    uint256 private constant MINIMUM_PAYLOAD_LENGTH_BYTES = 32;
 
     /////////////////////////////////////////////////////////////////////////
     //                             EVENTS                                  //
@@ -156,14 +153,13 @@ abstract contract ProtectionBase {
     /// if connected.
     /// @dev Can be called at the top of the derived contract's external functions directly intead of the modifier to
     /// reduce codesize from inlining the modifier multiple times.
+    /// @dev The `cube3Payload` argument is not used as the data is extraded from calldata, but is kept to remind the
+    /// developer to pass the payload as an argument to the enclosing function.
     function _assertProtectWhenConnected(bytes calldata cube3Payload) internal {
+        // bypasses compiler warnings for unused fn arguments
+        (cube3Payload);
         // Checks: the payload should be forwared to the CUBE3 protocol.
         if (connectedToCUBE3()) {
-            // Checks: the payload meets the minimum criteria.
-            if (cube3Payload.length < MINIMUM_PAYLOAD_LENGTH_BYTES) {
-                revert Cube3Protection_InvalidPayloadSize();
-            }
-
             // Interactions: forward the calldata, including the payload, along with the call context, to the CUBE3
             // protocol where it will be routed to the desired security module.
             _assertShouldProceedAndCall();

@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 < 0.8.24;
+pragma solidity >=0.8.19 < 0.9.0;
 
 import { ICube3RouterMinimal } from "./interfaces/ICube3RouterMinimal.sol";
 
