@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 <0.8.24;
+pragma solidity >=0.8.19 <0.9.0;
 
 /// @notice Abstract contract containing events emitted by the Protection contracts.
 abstract contract Events {
