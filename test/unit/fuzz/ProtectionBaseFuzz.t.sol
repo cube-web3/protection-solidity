@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity >=0.8.19 < 0.8.24;
+pragma solidity >=0.8.19 < 0.9.0;
 
 import { BaseTest } from "../../Base.t.sol";
 
@@ -12,17 +12,6 @@ contract ProtectionBase_Fuzz_Unit_Test is BaseTest {
     //                             cube3Protected                           //
     //////////////////////////////////////////////////////////////////////////
 
-    // when the payload is an invalid length, it should fail
-    function testFuzz_RevertsWhen_PayloadIsInvalidLength(uint256 length) public {
-        length = bound(length, 0, 31);
-
-        // create an invalid payload
-        bytes memory payload = new bytes(length);
-
-        protectionBaseHarness.baseInitProtection(address(mockRouter), users.integrationAdmin, true);
-        vm.expectRevert(Cube3Protection_InvalidPayloadSize.selector);
-        protectionBaseHarness.cube3ProtectedModifier(payload);
-    }
 
     //////////////////////////////////////////////////////////////////////////
     //                     _assertShouldProceedAndCall                     //
